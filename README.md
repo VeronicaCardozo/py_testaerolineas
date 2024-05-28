@@ -6,3 +6,4 @@ Grupo C: usuariosGitHub
 4. Juncos Nicolás: nicojuncos22
 5. Morales Cristian: cvmorales
 6. Vasquez Gonzalez Melary Ailed:
+7. Natalia Piaggio: NataliaPiaggio
