@@ -248,3 +248,171 @@ class AerolineasHomePage:
         # name = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(
         # self.box_chatbot_name))
         # name.send_keys("Nombre de prueba")
+    # Test card Nacional
+    @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
+    def validate_destino_nacional_card(self):
+        card_nacional = WebDriverWait(self.driver, 20).until(
+            EC.visibility_of_element_located(self.card_destino_nacional_2))
+        actions = ActionChains(self.driver)
+        actions.move_to_element(card_nacional).perform()
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Screenshot_destino_nacional", attachment_type=allure.attachment_type.PNG)
+        try:
+            card_element_0 = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.card_destino_nacional_0))
+            if card_element_0.is_displayed():
+                return "Se muestra las cards Nacionales"
+            else:
+                return "No se muestra la cards"
+        except Exception as e:
+            return "Error Card 1"
+
+    @allure.step("Validar si se encuentran las Cards de Destinos Internacionales")
+    def validate_destino_internacional_card(self):
+        try:
+            internacional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.btn_international_card))
+            internacional.click()
+            card_internacional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.card_destino_nacional_2))
+            actions = ActionChains(self.driver)
+            actions.move_to_element(card_internacional).perform()
+            allure.attach(self.driver.get_screenshot_as_png(
+            ), name="Screenshot_destino_internacional", attachment_type=allure.attachment_type.PNG)
+            card_element_0 = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.card_destino_nacional_0))
+            if card_element_0.is_displayed():
+                return "Se muestran las cards Internacionales"
+            else:
+                return "No se muestran las cards"
+        except Exception as e:
+            allure.attach(self.driver.get_screenshot_as_png(
+            ), name="Error_Screenshot", attachment_type=allure.attachment_type.PNG)
+            return f"Error Card Internacional: {str(e)}"
+
+    @allure.step("Validar si se encuentran las Cards de Destinos Regionales")
+    def validate_destino_regional_card(self):
+        try:
+            regional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.btn_regionales_card))
+            regional.click()
+            card_regional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.card_destino_nacional_2))
+            actions = ActionChains(self.driver)
+            actions.move_to_element(card_regional).perform()
+            allure.attach(self.driver.get_screenshot_as_png(
+            ), name="Screenshot_destino_regional", attachment_type=allure.attachment_type.PNG)
+            card_element_0 = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.card_destino_nacional_0))
+            if card_element_0.is_displayed():
+                return "Se muestran las cards Regionales"
+            else:
+                return "No se muestran las cards"
+        except Exception as e:
+            allure.attach(self.driver.get_screenshot_as_png(
+            ), name="Error_Screenshot", attachment_type=allure.attachment_type.PNG)
+            return f"Error Card Regional: {str(e)}"
+
+    def validate_card_nacional_csv(self, output_file='ofertas_nacionales.csv'):
+        xpaths = [
+            "(//a[@data-posicion='0'])",
+            "(//a[@data-posicion='1'])",
+            "(//a[@data-posicion='2'])",
+            "(//a[@data-posicion='3'])"
+        ]
+        data = []
+        try:
+            for xpath in xpaths:
+                card = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, xpath))
+                )
+                desde = card.find_element(
+                    By.XPATH, ".//div[@class='styled__SecondaryLabel-sc-17je9ro-5 tfyso thumbnail-secondary-label']").text
+                hacia = card.find_element(
+                    By.XPATH, ".//label[@class='styled__PrimaryLabel-sc-17je9ro-4 klasRx thumbnail-primary-label']").text
+                precio = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Fare-sc-17je9ro-7 fYFkWK thumbnail-fare']").text
+                clase = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Badge-sc-17je9ro-3 nRgyB thumbnail-badge']").text
+
+                data.append([desde, hacia, clase, precio])
+
+        finally:
+            with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(['desde', 'hacia', 'clase', 'precio'])
+                writer.writerows(data)
+
+            print(f'Data has been written to {output_file}')
+
+    def validate_card_internacional_csv(self, output_file='ofertas_internacionales.csv'):
+        xpaths = [
+            "(//a[@data-posicion='0'])",
+            "(//a[@data-posicion='1'])",
+            "(//a[@data-posicion='2'])",
+            "(//a[@data-posicion='3'])"
+        ]
+        data = []
+
+        try:
+            internacional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.btn_international_card))
+            internacional.click()
+            for xpath in xpaths:
+                card = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, xpath))
+                )
+                desde = card.find_element(
+                    By.XPATH, ".//div[@class='styled__SecondaryLabel-sc-17je9ro-5 tfyso thumbnail-secondary-label']").text
+                hacia = card.find_element(
+                    By.XPATH, ".//label[@class='styled__PrimaryLabel-sc-17je9ro-4 klasRx thumbnail-primary-label']").text
+                precio = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Fare-sc-17je9ro-7 fYFkWK thumbnail-fare']").text
+                clase = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Badge-sc-17je9ro-3 nRgyB thumbnail-badge']").text
+
+                data.append([desde, hacia, clase, precio])
+
+        finally:
+            with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(['desde', 'hacia', 'clase', 'precio'])
+                writer.writerows(data)
+
+            print(f'Data has been written to {output_file}')
+
+    def validate_card_regional_csv(self, output_file='ofertas_regionales.csv'):
+        xpaths = [
+            "(//a[@data-posicion='0'])",
+            "(//a[@data-posicion='1'])",
+            "(//a[@data-posicion='2'])",
+            "(//a[@data-posicion='3'])"
+        ]
+        data = []
+
+        try:
+            regional = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_element_located(self.btn_regionales_card))
+            regional.click()
+            for xpath in xpaths:
+                card = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, xpath))
+                )
+                desde = card.find_element(
+                    By.XPATH, ".//div[@class='styled__SecondaryLabel-sc-17je9ro-5 tfyso thumbnail-secondary-label']").text
+                hacia = card.find_element(
+                    By.XPATH, ".//label[@class='styled__PrimaryLabel-sc-17je9ro-4 klasRx thumbnail-primary-label']").text
+                precio = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Fare-sc-17je9ro-7 fYFkWK thumbnail-fare']").text
+                clase = card.find_element(
+                    By.XPATH, ".//label[@class='styled__Badge-sc-17je9ro-3 nRgyB thumbnail-badge']").text
+
+                data.append([desde, hacia, clase, precio])
+
+        finally:
+            with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(['desde', 'hacia', 'clase', 'precio'])
+                writer.writerows(data)
+
+            print(f'Data has been written to {output_file}')

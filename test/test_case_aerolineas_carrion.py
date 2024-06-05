@@ -14,7 +14,7 @@ class Test:
             driver.get("https://www.aerolineas.com.ar/")
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
-        home_page.button_whatsapp()
+        # home_page.button_whatsapp()
         home_page.chat_bot()
 
         time.sleep(3)
