@@ -8,6 +8,7 @@ import allure
 import time
 import os
 import openpyxl
+import csv
 
 
 class AerolineasHomePage:
@@ -33,6 +34,10 @@ class AerolineasHomePage:
         By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
     btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
+    button_whatsapp_locator = (By.ID, "whatsapp_flotante")
+    button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
+    box_chatbot_name = (By.XPATH, "//input[@name='wcx_chat_name']")
+
     def __init__(self, driver):
         self.driver = driver
     # metodos
@@ -41,13 +46,14 @@ class AerolineasHomePage:
     @allure.step("Verificamos el boton aceptar cookies y la cantidad de links en el home")
     def click_aceptar_cookies(self):
         btn = WebDriverWait(self.driver, 3).until(
-                EC.visibility_of_element_located(
-                    self.btn_locator_aceptar_cookies)
-            )
+            EC.visibility_of_element_located(
+                self.btn_locator_aceptar_cookies)
+        )
         print(" Boton aceptar cookies visible")
         assert btn.is_displayed(), "El boton de cookies no esta visible"
         btn.click()
         print(" Boton aceptar cookies visible y se hizo click en el ")
+
     @allure.step("Verificar cuantos Links hay en el home ")
     def cantidad_links_home(self):
         links = self.driver.find_elements(By.TAG_NAME, "a")
@@ -55,6 +61,7 @@ class AerolineasHomePage:
         for num in links:
             print(num.text)
         assert len(links) > 0, "No hay links en el home"
+
     @allure.step("Verificar boton menu idiomas ")
     def bnt_lenguaje_menu(self):
         btn_lenguaje = WebDriverWait(self.driver, 10).until(
@@ -65,7 +72,7 @@ class AerolineasHomePage:
             time.sleep(3)
             print(
                 "El menu lenguaje es visible")
-            assert btn_lenguaje.is_displayed(),"El boton no esta verificado"
+            assert btn_lenguaje.is_displayed(), "El boton no esta verificado"
         else:
             print("El botón de idioma no está visible")
         btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).click()
@@ -111,7 +118,6 @@ class AerolineasHomePage:
         box_date_return.send_keys(regreso_str, Keys.TAB)
         print("Caja de date_return es visible y los datos son ingresados")
 
-        
     @allure.step("Validar cantidad de pasajeros=2")
     def cambiar_cantidad_pasajeros(self):
         try:
@@ -130,7 +136,6 @@ class AerolineasHomePage:
             return True
         except TimeoutException as e:
             print(f"Error: {e}")
-
 
     @allure.step("Validar la búsqueda ingresando al botón búsqueda de vuelo de un vuelo-ida-regreso")
     def comprar_vuelo(self):
@@ -167,7 +172,7 @@ class AerolineasHomePage:
             precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
             if precio_vuelo_regreso > 0:
                 print("Día:", dia_vuelo_regreso,
-                    "Precio:", precio_vuelo_regreso)
+                      "Precio:", precio_vuelo_regreso)
 
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
@@ -182,7 +187,6 @@ class AerolineasHomePage:
             print(f"Error al obtener el precio del vuelo: {e}")
             return 0.0
 
-                
     @allure.step("Validar la compra ingresando al boton ver vuelos ")
     def ver_vuelos(self):
         try:
@@ -202,11 +206,45 @@ class AerolineasHomePage:
         except TimeoutException:
             print(
                 "No se encontró el botón de ver vuelos ")
-            
-        #falta mas assert 
-        #falta mas verificaciones
-        #tuve problemas con los selectores 
-        #faltA la segunda parte 
-        #y arreglar lo del excel 
-            
-            
+
+        # falta mas assert
+        # falta mas verificaciones
+        # tuve problemas con los selectores
+        # faltA la segunda parte
+        # y arreglar lo del excel
+
+    @allure.step("Verificamos que el boton whatsapp funcione")
+    def button_whatsapp(self):
+        btn_wts = WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located(
+                self.button_whatsapp_locator)
+        )
+        print(" Boton whatsapp visible")
+        assert btn_wts.is_displayed(), "El boton de whatsapp no esta visible"
+        btn_wts.click()
+        print("Se hizo click en el boton whatsapp")
+
+        self.driver.switch_to.window(self.driver.window_handles[1])
+        current_url = self.driver.current_url
+        assert current_url == 'https://api.whatsapp.com/send?phone=541149404798', f'URL actual: {
+            current_url}'
+        print("Se verifica que el boton de whatsaap nos redirecciona al chat")
+        self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
+
+    @allure.step("Verificamos que el chatbot responda a preguntas basicas")
+    def chat_bot(self):
+        btn_wcxchat = WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located(
+                self.button_chatbot_locator)
+        )
+        print(" Boton chatbot visible")
+
+        assert btn_wcxchat.is_displayed(), "El boton de chatbot no esta visible"
+
+        btn_wcxchat.click()
+        print("Se hizo click en el boton chatbot")
+
+        # name = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(
+        # self.box_chatbot_name))
+        # name.send_keys("Nombre de prueba")
