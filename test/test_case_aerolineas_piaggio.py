@@ -16,6 +16,7 @@ class Test_cards:
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
         home_page.validate_destino_nacional_card()
+        home_page.validate_card_nacional_csv()
 
     @allure.epic("Home_page_cards")
     @allure.title("Validar y verificar que las ofertas Internacionales sean visibles")
@@ -28,6 +29,7 @@ class Test_cards:
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
         home_page.validate_destino_internacional_card()
+        home_page.validate_card_internacional_csv()
 
     @allure.epic("Home_page_cards")
     @allure.title("Validar y verificar que las ofertas Regionales sean visibles")

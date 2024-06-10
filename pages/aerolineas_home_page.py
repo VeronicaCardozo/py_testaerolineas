@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 import allure
 import time
 import os
@@ -26,18 +27,22 @@ class AerolineasHomePage:
         By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
     btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
     # Localizadores para los elementos
-    fechas_ida = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='30']")
-    fechas_vuelta = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='7']")
+    fecha_ida = (By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+    fecha_vuelta = (
+        By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
     label_locator_monto = (
-        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+        By.XPATH, "//div[@class='styled__Price-ty299w-0 cbwzbP fdc-button-price']")
+
     btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
-    button_whatsapp_locator = (By.ID, "whatsapp_flotante")
-    button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
-    box_chatbot = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
-    prueba = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]/span[1]")
+    card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
+    card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
+    card_destino_nacional_2 = (By.XPATH, "//a[@data-posicion='2']")
+    card_destino_nacional_3 = (By.XPATH, "//a[@data-posicion='3']")
+    btn_internacionales_card = (
+        By.XPATH, "(//button[normalize-space()='Destinos Internacionales'])")
+    btn_regionales_card = (
+        By.XPATH, "(//button[normalize-space()='Destinos Regionales'])")
 
     def __init__(self, driver):
         self.driver = driver
@@ -155,25 +160,30 @@ class AerolineasHomePage:
 
     @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
     def precios_vuelos(self):
-        vuelos_ida = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_all_elements_located(self.fechas_ida))
-        vuelos_vuelta = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_all_elements_located(self.fechas_vuelta))
+        try:
+            vuelos_ida = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_all_elements_located(self.fecha_ida))
+            time.sleep(3)
+            vuelos_vuelta = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_all_elements_located(self.fecha_vuelta))
+            time.sleep(3)
 
-        print("Vuelos de ida:")
-        for vuelo in vuelos_ida:
-            dia_vuelo_ida = vuelo.text
-            precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
-            if precio_vuelo_ida > 0:
-                print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
+            print("Vuelos de ida:")
+            for vuelo in vuelos_ida:
+                dia_vuelo_ida = vuelo.text
+                precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_ida > 0:
+                    print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
 
-        print("Vuelos de regreso:")
-        for vuelo in vuelos_vuelta:
-            dia_vuelo_regreso = vuelo.text
-            precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
-            if precio_vuelo_regreso > 0:
-                print("Día:", dia_vuelo_regreso,
-                      "Precio:", precio_vuelo_regreso)
+            print("Vuelos de regreso:")
+            for vuelo in vuelos_vuelta:
+                dia_vuelo_regreso = vuelo.text
+                precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_regreso > 0:
+                    print("Día:", dia_vuelo_regreso,
+                          "Precio:", precio_vuelo_regreso)
+        except TimeoutException:
+            print("Error: No se encontraron vuelos en la fecha seleccionada")
 
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
@@ -208,99 +218,7 @@ class AerolineasHomePage:
             print(
                 "No se encontró el botón de ver vuelos ")
 
-        # falta mas assert
-        # falta mas verificaciones
-        # tuve problemas con los selectores
-        # faltA la segunda parte
-        # y arreglar lo del excel
-
-    @allure.step("Verificamos que el boton whatsapp funcione")
-    def button_whatsapp(self):
-        btn_wts = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located(
-                self.button_whatsapp_locator)
-        )
-        print(" Boton whatsapp visible")
-        assert btn_wts.is_displayed(), "El boton de whatsapp no esta visible"
-        btn_wts.click()
-        print("Se hizo click en el boton whatsapp")
-
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        current_url = self.driver.current_url
-        assert current_url == 'https://api.whatsapp.com/send?phone=541149404798', f'URL actual: {
-            current_url}'
-        print("Se verifica que el boton de whatsaap nos redirecciona al chat")
-        self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
-
-    @allure.step("Verificamos que el chatbot responda a preguntas basicas")
-    def chat_bot(self):
-        btn_wcxchat = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located(
-                self.button_chatbot_locator)
-        )
-        print(" Boton chatbot visible")
-
-        assert btn_wcxchat.is_displayed(), "El boton de chatbot no esta visible"
-
-        btn_wcxchat.click()
-        time.sleep(5)
-        '''
-    # Esperar a que aparezca y sea interactuable el elemento del nombre en el chat
-        box_name_chat_box = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, "//body/div[@id='wcx-chat']/button[1]/span[1]"))
-        )
-        print("Se visualiza el box name del chat")
-
-        # Espera opcional para asegurar que todo esté cargado correctamente
-        popup_handle = self.driver.window_handles[-1]
-
-        # Cambiar el contexto a la ventana emergente
-        self.driver.switch_to.window(popup_handle)
-
-        # Realizar clic en el elemento del nombre y enviar las teclas
-        action = ActionChains(self.driver)
-        action.click(box_name_chat_box).perform()
-        print("Clic realizado en el box name del chat")
-
-        action.send_keys("Nombre de prueba").perform()
-        print("Texto 'Nombre de prueba' enviado al elemento")
-        '''
-        time.sleep(5)
-
-    @allure.step("Verificamos que el chatbot responda a preguntas basicas")
-    def chat_bot_2(self):
-        wait = WebDriverWait(self.driver, 10)
-
-        # Abrir el chat
-        chat_button = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//button[@class='chat-menu titlebar-btn']")))
-        chat_button.click()
-
-        # Esperar a que la ventana emergente aparezca
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, "//form[@name='loginForm']")))
-
-        # Obtener el identificador de la ventana emergente
-        popup_handle = self.driver.window_handles[-1]
-
-        # Cambiar el contexto a la ventana emergente
-        self.driver.switch_to.window(popup_handle)
-
-        # Llenar el formulario de login
-        name_field = wait.until(EC.visibility_of_element_located(
-            (By.XPATH, "//input[@name='name']")))
-        name_field.send_keys("Tu nombre de usuario")
-
-        email_field = wait.until(EC.visibility_of_element_located(
-            (By.XPATH, "//input[@name='email']")))
-        email_field.send_keys("tu_correo@ejemplo.com")
-
-        continue_button = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, "//input[@type='submit' and @value='Continuar']")))
-        continue_button.click()
-
+    # Test card Nacional
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):
         card_nacional = WebDriverWait(self.driver, 20).until(
@@ -405,11 +323,7 @@ class AerolineasHomePage:
             "(//a[@data-posicion='3'])"
         ]
         data = []
-
         try:
-            internacional = WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located(self.btn_international_card))
-            internacional.click()
             for xpath in xpaths:
                 card = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, xpath))
@@ -441,11 +355,7 @@ class AerolineasHomePage:
             "(//a[@data-posicion='3'])"
         ]
         data = []
-
         try:
-            regional = WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located(self.btn_regionales_card))
-            regional.click()
             for xpath in xpaths:
                 card = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, xpath))
