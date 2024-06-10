@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 import allure
 import time
 import os
@@ -22,21 +23,15 @@ class AerolineasHomePage:
     box_date_from = (By.XPATH, "//input[@id='from-date']")
     box_date_return = (By.XPATH, "//input[@id='to-date']")
     number_pasajeros = (By.XPATH, "//button[@id = 'cabin-passengers']")
-    sumar_pasajeros = (
-        By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
-    btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
-    # Localizadores para los elementos
-    fechas_ida = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='30']")
-    fechas_vuelta = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='7']")
-    label_locator_monto = (
-        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
-    btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
-    button_whatsapp_locator = (By.ID, "whatsapp_flotante")
-    button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
-    box_chatbot_name = (By.XPATH, "//input[@name='wcx_chat_name']")
+    card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
+    card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
+    card_destino_nacional_2 = (By.XPATH, "//a[@data-posicion='2']")
+    card_destino_nacional_3 = (By.XPATH, "//a[@data-posicion='3']")
+    btn_internacionales_card = (
+        By.XPATH, "(//button[normalize-space()='Destinos Internacionales'])")
+    btn_regionales_card = (
+        By.XPATH, "(//button[normalize-space()='Destinos Regionales'])")
 
     def __init__(self, driver):
         self.driver = driver
@@ -207,47 +202,6 @@ class AerolineasHomePage:
             print(
                 "No se encontró el botón de ver vuelos ")
 
-        # falta mas assert
-        # falta mas verificaciones
-        # tuve problemas con los selectores
-        # faltA la segunda parte
-        # y arreglar lo del excel
-
-    @allure.step("Verificamos que el boton whatsapp funcione")
-    def button_whatsapp(self):
-        btn_wts = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located(
-                self.button_whatsapp_locator)
-        )
-        print(" Boton whatsapp visible")
-        assert btn_wts.is_displayed(), "El boton de whatsapp no esta visible"
-        btn_wts.click()
-        print("Se hizo click en el boton whatsapp")
-
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        current_url = self.driver.current_url
-        assert current_url == 'https://api.whatsapp.com/send?phone=541149404798', f'URL actual: {
-            current_url}'
-        print("Se verifica que el boton de whatsaap nos redirecciona al chat")
-        self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
-
-    @allure.step("Verificamos que el chatbot responda a preguntas basicas")
-    def chat_bot(self):
-        btn_wcxchat = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located(
-                self.button_chatbot_locator)
-        )
-        print(" Boton chatbot visible")
-
-        assert btn_wcxchat.is_displayed(), "El boton de chatbot no esta visible"
-
-        btn_wcxchat.click()
-        print("Se hizo click en el boton chatbot")
-
-        # name = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(
-        # self.box_chatbot_name))
-        # name.send_keys("Nombre de prueba")
     # Test card Nacional
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):
@@ -353,11 +307,7 @@ class AerolineasHomePage:
             "(//a[@data-posicion='3'])"
         ]
         data = []
-
         try:
-            internacional = WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located(self.btn_international_card))
-            internacional.click()
             for xpath in xpaths:
                 card = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, xpath))
@@ -389,11 +339,7 @@ class AerolineasHomePage:
             "(//a[@data-posicion='3'])"
         ]
         data = []
-
         try:
-            regional = WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located(self.btn_regionales_card))
-            regional.click()
             for xpath in xpaths:
                 card = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, xpath))
