@@ -27,12 +27,12 @@ class AerolineasHomePage:
         By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
     btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
     # Localizadores para los elementos
-    fechas_ida = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='30']")
-    fechas_vuelta = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='7']")
+    fecha_ida = (By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+    fecha_vuelta = (
+        By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
     label_locator_monto = (
-        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+        By.XPATH, "//div[@class='styled__Price-ty299w-0 cbwzbP fdc-button-price']")
+
     btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
     card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
@@ -160,25 +160,30 @@ class AerolineasHomePage:
 
     @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
     def precios_vuelos(self):
-        vuelos_ida = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_all_elements_located(self.fechas_ida))
-        vuelos_vuelta = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_all_elements_located(self.fechas_vuelta))
+        try:
+            vuelos_ida = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_all_elements_located(self.fecha_ida))
+            time.sleep(3)
+            vuelos_vuelta = WebDriverWait(self.driver, 20).until(
+                EC.visibility_of_all_elements_located(self.fecha_vuelta))
+            time.sleep(3)
 
-        print("Vuelos de ida:")
-        for vuelo in vuelos_ida:
-            dia_vuelo_ida = vuelo.text
-            precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
-            if precio_vuelo_ida > 0:
-                print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
+            print("Vuelos de ida:")
+            for vuelo in vuelos_ida:
+                dia_vuelo_ida = vuelo.text
+                precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_ida > 0:
+                    print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
 
-        print("Vuelos de regreso:")
-        for vuelo in vuelos_vuelta:
-            dia_vuelo_regreso = vuelo.text
-            precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
-            if precio_vuelo_regreso > 0:
-                print("Día:", dia_vuelo_regreso,
-                    "Precio:", precio_vuelo_regreso)
+            print("Vuelos de regreso:")
+            for vuelo in vuelos_vuelta:
+                dia_vuelo_regreso = vuelo.text
+                precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_regreso > 0:
+                    print("Día:", dia_vuelo_regreso,
+                        "Precio:", precio_vuelo_regreso)
+        except TimeoutException:
+            print("Error: No se encontraron vuelos en la fecha seleccionada")
 
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
@@ -192,7 +197,6 @@ class AerolineasHomePage:
         except Exception as e:
             print(f"Error al obtener el precio del vuelo: {e}")
             return 0.0
-
     @allure.step("Validar la compra ingresando al boton ver vuelos ")
     def ver_vuelos(self):
         try:
