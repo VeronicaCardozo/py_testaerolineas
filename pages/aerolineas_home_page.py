@@ -23,6 +23,17 @@ class AerolineasHomePage:
     box_date_from = (By.XPATH, "//input[@id='from-date']")
     box_date_return = (By.XPATH, "//input[@id='to-date']")
     number_pasajeros = (By.XPATH, "//button[@id = 'cabin-passengers']")
+    sumar_pasajeros = (
+        By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
+    btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
+    # Localizadores para los elementos
+    fechas_ida = (
+        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='30']")
+    fechas_vuelta = (
+        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='7']")
+    label_locator_monto = (
+        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+    btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
     card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
     card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
@@ -167,7 +178,7 @@ class AerolineasHomePage:
             precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
             if precio_vuelo_regreso > 0:
                 print("Día:", dia_vuelo_regreso,
-                      "Precio:", precio_vuelo_regreso)
+                    "Precio:", precio_vuelo_regreso)
 
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
