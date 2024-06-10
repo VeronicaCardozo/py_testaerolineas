@@ -51,8 +51,6 @@ class Test_cards:
 
         home_page = AerolineasHomePage(driver)
         home_page.validate_card_nacional_csv()
-        home_page.validate_card_internacional_csv()
-        home_page.validate_card_regional_csv()
 
     @allure.epic("Home_page_cards")
     @allure.title("Validar y verificar ofertas internacionales")

@@ -36,7 +36,8 @@ class AerolineasHomePage:
 
     button_whatsapp_locator = (By.ID, "whatsapp_flotante")
     button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
-    box_chatbot_name = (By.XPATH, "//input[@name='wcx_chat_name']")
+    box_chatbot = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
+    prueba = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]/span[1]")
 
     def __init__(self, driver):
         self.driver = driver
@@ -243,12 +244,63 @@ class AerolineasHomePage:
         assert btn_wcxchat.is_displayed(), "El boton de chatbot no esta visible"
 
         btn_wcxchat.click()
-        print("Se hizo click en el boton chatbot")
+        time.sleep(5)
+        '''
+    # Esperar a que aparezca y sea interactuable el elemento del nombre en el chat
+        box_name_chat_box = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//body/div[@id='wcx-chat']/button[1]/span[1]"))
+        )
+        print("Se visualiza el box name del chat")
 
-        # name = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(
-        # self.box_chatbot_name))
-        # name.send_keys("Nombre de prueba")
-    # Test card Nacional
+        # Espera opcional para asegurar que todo esté cargado correctamente
+        popup_handle = self.driver.window_handles[-1]
+
+        # Cambiar el contexto a la ventana emergente
+        self.driver.switch_to.window(popup_handle)
+
+        # Realizar clic en el elemento del nombre y enviar las teclas
+        action = ActionChains(self.driver)
+        action.click(box_name_chat_box).perform()
+        print("Clic realizado en el box name del chat")
+
+        action.send_keys("Nombre de prueba").perform()
+        print("Texto 'Nombre de prueba' enviado al elemento")
+        '''
+        time.sleep(5)
+
+    @allure.step("Verificamos que el chatbot responda a preguntas basicas")
+    def chat_bot_2(self):
+        wait = WebDriverWait(self.driver, 10)
+
+        # Abrir el chat
+        chat_button = wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//button[@class='chat-menu titlebar-btn']")))
+        chat_button.click()
+
+        # Esperar a que la ventana emergente aparezca
+        wait.until(EC.presence_of_element_located(
+            (By.XPATH, "//form[@name='loginForm']")))
+
+        # Obtener el identificador de la ventana emergente
+        popup_handle = self.driver.window_handles[-1]
+
+        # Cambiar el contexto a la ventana emergente
+        self.driver.switch_to.window(popup_handle)
+
+        # Llenar el formulario de login
+        name_field = wait.until(EC.visibility_of_element_located(
+            (By.XPATH, "//input[@name='name']")))
+        name_field.send_keys("Tu nombre de usuario")
+
+        email_field = wait.until(EC.visibility_of_element_located(
+            (By.XPATH, "//input[@name='email']")))
+        email_field.send_keys("tu_correo@ejemplo.com")
+
+        continue_button = wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//input[@type='submit' and @value='Continuar']")))
+        continue_button.click()
+
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):
         card_nacional = WebDriverWait(self.driver, 20).until(
