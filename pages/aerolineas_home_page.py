@@ -10,8 +10,12 @@ import os
 import openpyxl
 import csv
 
+import openpyxl
+from datetime import datetime, timedelta
+
 
 class AerolineasHomePage:
+
     # Locators
     btn_locator_aceptar_cookies = (
         By.XPATH, "(//button[@type='cookies'])")
@@ -25,13 +29,14 @@ class AerolineasHomePage:
     sumar_pasajeros = (
         By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
     btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
+
     # Localizadores para los elementos
     fechas_ida = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='30']")
+        By.XPATH, "//label[normalize-space()='IDA']")
     fechas_vuelta = (
-        By.XPATH, "//div[@class='styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class='styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day'][normalize-space()='7']")
+        By.XPATH, "//label[normalize-space()='VUELTA']")
     label_locator_monto = (
-        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+        By.XPATH, "//div[@class='styled__PriceContainer-nhpxq-8 hyqIll']")
     btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
     # Locators Cards
@@ -87,7 +92,7 @@ class AerolineasHomePage:
     @allure.step("Validar los datos ingresados desde un archivo plano: en este caso Excel")
     def datos_excel(self):
         archivo = openpyxl.load_workbook(
-            'C:\\py_automation\\Data\\datos_qa.xlsx')
+            'C:\\Users\\cvmor\\OneDrive\\Escritorio\\TestingMerlinData\\py_testaerolineas\\Data\\datos_qa.xlsx')
         sheet = archivo['Hoja1']
         for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
             valores_fila = [celda.value for celda in fila]
@@ -95,6 +100,25 @@ class AerolineasHomePage:
             ida_str = ida.strftime("%d/%m/%Y")
             regreso_str = regreso.strftime("%d/%m/%Y")
             self.buscar_vuelo(origen, destino, ida_str, regreso_str)
+
+    @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias")
+    def datos_excel_sumar_20(self):
+        archivo = openpyxl.load_workbook(
+            'C:\\Users\\cvmor\\OneDrive\\Escritorio\\TestingMerlinData\\py_testaerolineas\\Data\\datos_qa.xlsx')
+        sheet = archivo['Hoja2']
+        for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+            valores_fila = [celda.value for celda in fila]
+            origen, destino, ida, regreso, url = valores_fila
+            # Sumar 20 días a la fecha de ida y regreso
+            ida = self.sumar_20_dias(ida)
+            regreso = self.sumar_20_dias(regreso)
+            ida_str = ida.strftime("%d/%m/%Y")
+            regreso_str = regreso.strftime("%d/%m/%Y")
+            self.buscar_vuelo(origen, destino, ida_str, regreso_str)
+
+    def sumar_20_dias(self, fecha_actual):
+        fecha_sumada = fecha_actual + timedelta(days=20)
+        return fecha_sumada
 
     def buscar_vuelo(self, origen, destino, ida_str, regreso_str):
         box_origen = WebDriverWait(self.driver, 10).until(
@@ -194,27 +218,26 @@ class AerolineasHomePage:
             print(f"Error al obtener el precio del vuelo: {e}")
             return 0.0
 
-    @allure.step("Validar la compra ingresando al boton ver vuelos ")
+    @allure.step("Validar la compra ingresando al botón ver vuelos")
     def ver_vuelos(self):
         try:
-            ver_vuelo = WebDriverWait(self.driver, 10).until(
+            print("Esperando que el botón de ver vuelos sea visible...")
+            ver_vuelo = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.btn_ver_vuelo)
             )
 
             if ver_vuelo.is_displayed():
+                print("El botón de ver vuelos es visible.")
                 ver_vuelo.click()
-
                 time.sleep(6)
-                print(
-                    "El botón de ver vuelos es visible y hacemos click en el")
+                print("Hicimos click en el botón de ver vuelos.")
             else:
-                print(
-                    "El botón de ver vuelos no es visible.")
+                print("El botón de ver vuelos no es visible.")
         except TimeoutException:
-            print(
-                "No se encontró el botón de ver vuelos ")
+            print("No se encontró el botón de ver vuelos después de esperar 20 segundos.")
 
     # Test card Nacional
+
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):
         card_nacional = WebDriverWait(self.driver, 20).until(
