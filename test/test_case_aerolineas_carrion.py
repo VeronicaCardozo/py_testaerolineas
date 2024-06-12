@@ -17,7 +17,7 @@ class Test:
         # home_page.button_whatsapp()
         home_page.chat_bot()
 
-        time.sleep(3)
+        time.sleep(5)
 
 
 if __name__ == "__main__":

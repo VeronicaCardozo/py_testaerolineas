@@ -2,6 +2,8 @@ import pytest
 import allure
 from pages.aerolineas_home_page import AerolineasHomePage
 from pages.aerolineas_result_page import AerolineasResultPage
+from selenium import webdriver
+from datetime import datetime, timedelta
 
 
 class Test:
@@ -38,6 +40,20 @@ class Test:
         home_page.precios_vuelos()
         home_page.ver_vuelos()
     
+
+    @allure.title("Validar y verificar la compra de un vuelo ingresando +20 dias")
+    @allure.description("Validar que los datos se ingresen correctamente")
+    @pytest.mark.noprod
+    def test_validar_excel_sumar_20(self, driver):
+        with allure.step("Ingreso a la página"):
+            driver.get("https://www.aerolineas.com.ar/")
+        home_page = AerolineasHomePage(driver)
+        home_page.click_aceptar_cookies()
+        home_page.datos_excel_sumar_20()
+        home_page.cambiar_cantidad_pasajeros()
+        home_page.comprar_vuelo()
+        home_page.precios_vuelos()
+        home_page.ver_vuelos()
 
 
 if __name__ == "__main__":
