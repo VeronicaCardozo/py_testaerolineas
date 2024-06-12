@@ -7,7 +7,7 @@ from pages.aerolineas_home_page import AerolineasHomePage
 from pages.aerolineas_result_page import AerolineasResultPage
 
 
-class test:
+class TestAerolineas:
 
     @allure.title("Verificar que los elementos de la pagina acceso se muestre en Aerolienas Argentinas")
     @allure.description(

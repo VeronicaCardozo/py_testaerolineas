@@ -67,6 +67,9 @@ class AerolineasHomePage:
         By.XPATH, "//body/div[@id='wcx-chat']/div[1]/div[1]/iframe[1]")
     chat_olyne_name_input_locator = (
         By.XPATH, "//div[@id='f1e92af809cc4af596b8e15009725100']//input[@name='name']")
+    
+    btn_locator_vuelos = (By.XPATH, "//a[normalize-space()='VUELOS']")
+    btn_locator_check_in = (By.XPATH, "//a[normalize-space()='CHECK IN']")
 
     def __init__(self, driver):
         self.driver = driver
@@ -295,7 +298,7 @@ class AerolineasHomePage:
                 precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
                 if precio_vuelo_regreso > 0:
                     print("Día:", dia_vuelo_regreso,
-                          "Precio:", precio_vuelo_regreso)
+                        "Precio:", precio_vuelo_regreso)
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
 
@@ -766,9 +769,6 @@ class AerolineasHomePage:
         # Volver al contexto padre si es necesario
         self.driver.switch_to.default_content()
 
-    btn_locator_aceptar_cookies = (By.XPATH, "//button[@id='cookies']")
-    btn_locator_vuelos = (By.XPATH, "//a[normalize-space()='VUELOS']")
-    btn_locator_check_in = (By.XPATH, "//a[normalize-space()='CHECK IN']")
 
     @allure.step("Hacemos click en el boton aceptar cookies")
     def clic_aceptar_cookies(self):
