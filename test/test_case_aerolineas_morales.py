@@ -17,16 +17,6 @@ class Test:
         home_page.click_aceptar_cookies()
         home_page.cantidad_links_home()
 
-    @allure.title("Validar y verificar links con funcionalidades importates")
-    @allure.description("Validar que los links funcionen")
-    @pytest.mark.noprod
-    def test_links(self, driver):
-        with allure.step("Ingreso a la pagina y valida los tests solicitados"):
-            driver.get("https://www.aerolineas.com.ar/")
-        home_page = AerolineasHomePage(driver)
-        home_page.click_aceptar_cookies()
-        home_page.verificar_links()
-
     @allure.title("Validar y verificar boton aceptar menu lenguaje funcione")
     @allure.description("Validar boton menu lenguaje")
     @pytest.mark.noprod
@@ -34,18 +24,19 @@ class Test:
         with allure.step("Ingreso a la pagina y validar el menu lenguaje "):
             driver.get("https://www.aerolineas.com.ar/")
         home_page = AerolineasHomePage(driver)
-        home_page.click_aceptar_cookies()
         home_page.bnt_lenguaje_menu()
 
-    @ allure.title("Validar y verificar la compra de un vuelo ingresando datos")
-    @ allure.description("Validar que los datos se ingresen correctamente")
+    # validar compra +20 dias CM
+
+    @allure.title("Validar y verificar la compra de un vuelo ingresando +20 dias de hoja 2")
+    @allure.description("Validar que los datos se ingresen correctamente")
     @pytest.mark.noprod
-    def test_validar_excel(self, driver):
-        with allure.step("Ingreso a la pagina"):
+    def test_validar_excel_sumar_20(self, driver):
+        with allure.step("Ingreso a la página"):
             driver.get("https://www.aerolineas.com.ar/")
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
-        home_page.datos_excel()
+        home_page.datos_excel_sumar_20()
         home_page.cambiar_cantidad_pasajeros()
         home_page.comprar_vuelo()
         home_page.precios_vuelos()

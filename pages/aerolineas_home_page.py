@@ -11,13 +11,19 @@ import os
 import openpyxl
 import csv
 
+import openpyxl
+from datetime import datetime, timedelta
+
 
 class AerolineasHomePage:
+
     # Locators
     btn_locator_aceptar_cookies = (
         By.XPATH, "(//button[@type='cookies'])")
     btn_locator_lenguaje_menu = (
         By.XPATH, "//button[@class='styled__LanguageMenu-sc-22nvvu-8 fEfYIU']")
+    lenguaje_elegido = (
+        By.XPATH, "//div[@id='language-panel']//a[normalize-space()='United States (English)']")
     box_origen = (By.XPATH, "//input[@placeholder='Origen']")
     box_destino = (By.XPATH, "//input[@placeholder='Destino']")
     box_date_from = (By.XPATH, "//input[@id='from-date']")
@@ -26,15 +32,15 @@ class AerolineasHomePage:
     sumar_pasajeros = (
         By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
     btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
+
     # Localizadores para los elementos
-    fecha_ida = (By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+    fecha_ida = (
+        By.XPATH, "//div[contains(@class, 'styled__EnabledDateOffer-ty299w-8')]//div[contains(@class, 'fdc-button-day') and normalize-space()='1']")
     fecha_vuelta = (
-        By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+        By.XPATH, "//div[contains(@class, 'styled__EnabledDateOffer-ty299w-8')]//div[contains(@class, 'fdc-button-day') and normalize-space()='7']")
     label_locator_monto = (
-        By.XPATH, "//div[@class='styled__Price-ty299w-0 cbwzbP fdc-button-price']")
-
-    btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
-
+        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+    btn_ver_vuelo = (By.XPATH, "//button[contains(text(),'Ver vuelos')]")
     card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
     card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
     card_destino_nacional_2 = (By.XPATH, "//a[@data-posicion='2']")
@@ -76,20 +82,49 @@ class AerolineasHomePage:
             print(num.text)
         assert len(links) > 0, "No hay links en el home"
 
-    @allure.step("Verificar boton menu idiomas ")
+    @allure.step("Verificar accesibilidad de links importantes")
+    def verificar_links(self):
+
+        links = [
+            ("Vuelos", "//a[contains(text(),'VUELOS')]"),
+            ("Check-in", "//a[contains(text(),'CHECK IN')]"),
+            ("Estado de vuelo", "//a[contains(text(),'ESTADO DE VUELO')]"),
+            ("Mi reserva", "//a[contains(text(),'MI RESERVA')]")
+        ]
+        for name, xpath in links:
+            allure.dynamic.description(f"Verificando link: {name}")
+            assert self.verify_element(By.XPATH, xpath), f"El enlace '{
+                name}' no fue encontrado."
+
+    @allure.step("Verificar links")
+    def verify_element(self, by, locator):
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((by, locator))
+            )
+            return True
+        except:
+            return False
+
+    @allure.step("Verificar boton menu idiomas e idioma seleccionado ")
     def bnt_lenguaje_menu(self):
         btn_lenguaje = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.btn_locator_lenguaje_menu)
         )
-        if btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).is_displayed():
-            btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).click()
+        if btn_lenguaje.is_displayed():
+            btn_lenguaje.click()
             time.sleep(3)
-            print(
-                "El menu lenguaje es visible")
+            print("El menu lenguaje es visible")
             assert btn_lenguaje.is_displayed(), "El boton no esta verificado"
+            lenguage_option = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.lenguaje_elegido)
+            )
+            lenguage_option.click()
+            time.sleep(5)
+            print("Idioma seleccionado")
         else:
             print("El botón de idioma no está visible")
-        btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).click()
+        # datos excel
 
     @allure.step("Validar los datos ingresados desde un archivo plano: en este caso Excel")
     def datos_excel(self):
@@ -103,6 +138,7 @@ class AerolineasHomePage:
             regreso_str = regreso.strftime("%d/%m/%Y")
             self.buscar_vuelo(origen, destino, ida_str, regreso_str)
 
+    @allure.step("Validar los datos de la reserva")
     def buscar_vuelo(self, origen, destino, ida_str, regreso_str):
         box_origen = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_origen))
@@ -111,7 +147,6 @@ class AerolineasHomePage:
         time.sleep(2)
         box_origen.send_keys(Keys.ARROW_DOWN, Keys.ENTER, Keys.TAB)
         print("Caja de origen es visible y los datos son ingresados")
-
         box_destino = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_destino))
         box_destino.clear()
@@ -119,13 +154,11 @@ class AerolineasHomePage:
         time.sleep(2)
         box_destino.send_keys(Keys.ARROW_DOWN, Keys.ENTER, Keys.TAB)
         print("Caja de destino es visible y los datos son ingresados")
-
         box_date_from = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_date_from))
         box_date_from.clear()
         box_date_from.send_keys(ida_str, Keys.TAB)
         print("Caja de date_from es visible y los datos son ingresados")
-
         box_date_return = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_date_return))
         box_date_return.clear()
@@ -138,8 +171,8 @@ class AerolineasHomePage:
             pasajeros = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.number_pasajeros))
             pasajeros.click()
+            assert pasajeros.is_displayed(), "El boton no esta verificado"
             print("Boton pasajeros visible y hacemos click")
-
             btn_mas = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.sumar_pasajeros))
             btn_mas.click()
@@ -156,10 +189,10 @@ class AerolineasHomePage:
         try:
             btn_comprar = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located(self.btn_click_vuelo))
-
             if btn_comprar.is_enabled():
                 btn_comprar.click()
                 time.sleep(6)
+
                 print("El botón de comprar de vuelo es visible y hacemos click en él")
             else:
                 print("El botón de compra de vuelo no es visible.")
@@ -169,10 +202,10 @@ class AerolineasHomePage:
     @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
     def precios_vuelos(self):
         try:
-            vuelos_ida = WebDriverWait(self.driver, 20).until(
+            vuelos_ida = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_all_elements_located(self.fecha_ida))
             time.sleep(3)
-            vuelos_vuelta = WebDriverWait(self.driver, 20).until(
+            vuelos_vuelta = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_all_elements_located(self.fecha_vuelta))
             time.sleep(3)
 
@@ -193,6 +226,7 @@ class AerolineasHomePage:
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
 
+    @allure.step("Validar precios")
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
             precio_elemento = vuelo_elemento.find_element(
@@ -206,27 +240,110 @@ class AerolineasHomePage:
             print(f"Error al obtener el precio del vuelo: {e}")
             return 0.0
 
-    @allure.step("Validar la compra ingresando al boton ver vuelos ")
+    @allure.step("Validar la búsqueda ingresando al botón búsqueda de vuelo de un vuelo-ida-regreso")
+    def comprar_vuelo(self):
+        try:
+            btn_comprar = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.btn_click_vuelo))
+            if btn_comprar.is_enabled():
+                btn_comprar.click()
+                time.sleep(6)
+
+                print("El botón de comprar de vuelo es visible y hacemos click en él")
+            else:
+                print("El botón de compra de vuelo no es visible.")
+        except TimeoutException:
+            print("No se encontró el botón de comprar de vuelo ")
+
+    @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
+    def precios_vuelos(self):
+        try:
+            vuelos_ida = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located(self.fecha_ida))
+            time.sleep(3)
+            vuelos_vuelta = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located(self.fecha_vuelta))
+            time.sleep(3)
+
+            print("Vuelos de ida:")
+            for vuelo in vuelos_ida:
+                dia_vuelo_ida = vuelo.text
+                precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_ida > 0:
+                    print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
+
+            print("Vuelos de regreso:")
+            for vuelo in vuelos_vuelta:
+                dia_vuelo_regreso = vuelo.text
+                precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_regreso > 0:
+                    print("Día:", dia_vuelo_regreso,
+                          "Precio:", precio_vuelo_regreso)
+        except TimeoutException:
+            print("Error: No se encontraron vuelos en la fecha seleccionada")
+
+    @allure.step("Validar precios")
+    def obtener_precio_vuelo(self, vuelo_elemento):
+        try:
+            precio_elemento = vuelo_elemento.find_element(
+                *self.label_locator_monto)
+            precio_text = precio_elemento.text.replace(
+                '$', '').replace(',', '').strip()
+            if precio_text and precio_text.replace('.', '', 1).isdigit():
+                return float(precio_text)
+            return 0.0
+        except Exception as e:
+            print(f"Error al obtener el precio del vuelo: {e}")
+            return 0.0
+
+    @allure.step("Validar la compra ingresando al botón ver vuelos")
     def ver_vuelos(self):
         try:
-            ver_vuelo = WebDriverWait(self.driver, 10).until(
+            print("Esperando que el botón de ver vuelos sea visible...")
+            ver_vuelo = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.btn_ver_vuelo)
             )
 
             if ver_vuelo.is_displayed():
+                print("El botón de ver vuelos es visible.")
+            if ver_vuelo.is_enabled():
                 ver_vuelo.click()
-
                 time.sleep(6)
+                print("Hicimos click en el botón de ver vuelos.")
+
+                time.sleep(3)
                 print(
                     "El botón de ver vuelos es visible y hacemos click en el")
             else:
-                print(
-                    "El botón de ver vuelos no es visible.")
+                print("El botón de ver vuelos no es visible.")
         except TimeoutException:
+            print("No se encontró el botón de ver vuelos después de esperar 20 segundos.")
+
             print(
                 "No se encontró el botón de ver vuelos ")
 
+    # test +20 dias en hoja2
+    @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias a hoja 2")
+    def datos_excel_sumar_20(self):
+        archivo = openpyxl.load_workbook(
+            'C:\\py_automation\\py_testaerolineas\\Data\\datos_qa.xlsx')
+        sheet = archivo['Hoja2']
+        for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+            valores_fila = [celda.value for celda in fila]
+            origen, destino, ida, regreso, url = valores_fila
+            # Sumar 20 días a la fecha de ida y regreso
+            ida = self.sumar_20_dias(ida)
+            regreso = self.sumar_20_dias(regreso)
+            ida_str = ida.strftime("%d/%m/%Y")
+            regreso_str = regreso.strftime("%d/%m/%Y")
+            self.buscar_vuelo(origen, destino, ida_str, regreso_str)
+
+    def sumar_20_dias(self, fecha_actual):
+        fecha_sumada = fecha_actual + timedelta(days=20)
+        return fecha_sumada
+
     # Test card Nacional
+
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):
         card_nacional = WebDriverWait(self.driver, 20).until(
@@ -386,6 +503,7 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+<<<<<<< HEAD
 
     @allure.step("Verificación whatsapp web")
     def whatsapp_chat(self):
@@ -608,3 +726,41 @@ class AerolineasHomePage:
         print("Se verifico que el chat responde'")
         # Volver al contexto padre si es necesario
         self.driver.switch_to.default_content()
+=======
+    btn_locator_aceptar_cookies = (By.XPATH, "//button[@id='cookies']")
+    btn_locator_vuelos = (By.XPATH, "//a[normalize-space()='VUELOS']")
+    btn_locator_check_in = (By.XPATH, "//a[normalize-space()='CHECK IN']")
+
+    @allure.step("Hacemos click en el boton aceptar cookies")
+    def clic_aceptar_cookies(self):
+        """
+        Método para validar el botón aceptar cookies.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_aceptar_cookies)
+        )
+        if self.driver.find_element(*self.btn_locator_aceptar_cookies).is_displayed():
+            self.driver.find_element(*self.btn_locator_aceptar_cookies).click()
+
+    @allure.step("Verificar el boton vuelos")
+    def btn_vuelos(self):
+        """
+        Método para validar el boton vuelo.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_vuelos)
+        )
+        if self.driver.find_element(*self.btn_locator_vuelos).is_displayed():
+            self.driver.find_element(*self.btn_locator_vuelos).click()
+
+    @allure.step("Verificar el boton chek in")
+    def btn_check_in(self):
+        """
+        Método para validar el boton check in.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_check_in)
+        )
+        if self.driver.find_element(*self.btn_locator_check_in).is_displayed():
+            self.driver.find_element(*self.btn_locator_check_in).click()
+>>>>>>> 975f161ac7ffea0997d062bdc5ad4b2d2ed253a5
