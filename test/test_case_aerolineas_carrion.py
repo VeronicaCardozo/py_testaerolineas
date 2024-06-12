@@ -6,18 +6,38 @@ import time
 
 
 class Test:
+    @allure.epic("Customer_Communication")
     @allure.title("Validar y verificar boton whatsapp")
-    @allure.description("Validar que el boton aceptar whatsapp funcione")
+    @allure.description("Validar que el boton whatsapp funcione")
     @pytest.mark.noprod
-    def test_aerolineas_home(self, driver):
+    def test_whatsapp_web(self, driver):
         with allure.step("Ingreso a la pagina y valida los tests solicitados"):
             driver.get("https://www.aerolineas.com.ar/")
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
-        # home_page.button_whatsapp()
-        home_page.chat_bot()
+        home_page.whatsapp_chat()
 
-        time.sleep(5)
+    @allure.epic("Chat_Features")
+    @allure.title("Validar y verificar boton chat online funcione")
+    @allure.description("Validar que el boton chat online inicialice el chat y muestre las opciones")
+    @pytest.mark.noprod
+    def test_aerolineas_chat_online(self, driver):
+        with allure.step("Ingreso a la pagina y valida los tests solicitados"):
+            driver.get("https://www.aerolineas.com.ar/")
+        home_page = AerolineasHomePage(driver)
+        home_page.click_aceptar_cookies()
+        home_page.login_chat_online()
+
+    @allure.epic("Chat_Features")
+    @allure.title("Validar y verificar boton reservas en chat online ")
+    @allure.description("Validar que el boton reservas del chat online inicialice el chat y muestre las opciones")
+    @pytest.mark.noprod
+    def test_aerolineas_chat_reservas(self, driver):
+        with allure.step("Ingreso a la pagina y valida los tests solicitados"):
+            driver.get("https://www.aerolineas.com.ar/")
+        home_page = AerolineasHomePage(driver)
+        home_page.click_aceptar_cookies()
+        home_page.reservas_chat_online2()
 
 
 if __name__ == "__main__":
