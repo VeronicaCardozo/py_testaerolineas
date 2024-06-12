@@ -54,9 +54,6 @@ class Test:
         home_page.comprar_vuelo()
         home_page.precios_vuelos()
         home_page.ver_vuelos()
-    
-
-    
 
 
 if __name__ == "__main__":

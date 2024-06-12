@@ -25,5 +25,7 @@ class test:
         home_page.btn_check_in()
 
 
+
 if __name__ == "__main__":
     pytest.main()
+

@@ -22,6 +22,7 @@ class AerolineasHomePage:
         By.XPATH, "(//button[@type='cookies'])")
     btn_locator_lenguaje_menu = (
         By.XPATH, "//button[@class='styled__LanguageMenu-sc-22nvvu-8 fEfYIU']")
+    
     lenguaje_elegido = (
         By.XPATH, "//div[@id='language-panel']//a[normalize-space()='United States (English)']")
     box_origen = (By.XPATH, "//input[@placeholder='Origen']")
@@ -58,6 +59,15 @@ class AerolineasHomePage:
     chat_olyne_name_input_locator = (
         By.XPATH, "//div[@id='f1e92af809cc4af596b8e15009725100']//input[@name='name']")
 
+    button_whatsapp_locator = (By.ID, "whatsapp_flotante")
+    button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
+    box_chatbot_locator = (
+        By.XPATH, "//div[@class='chat-container']//span[@class='input-group-addon']//input[@class='form-control ng-pristine ng-invalid ng-invalid-required ng-touched div-name-with-buttons']")
+    iframe_chat_onlyne_locator = (
+        By.XPATH, "//body/div[@id='wcx-chat']/div[1]/div[1]/iframe[1]")
+    chat_olyne_name_input_locator = (
+        By.XPATH, "//div[@id='f1e92af809cc4af596b8e15009725100']//input[@name='name']")
+
     def __init__(self, driver):
         self.driver = driver
     # metodos
@@ -85,6 +95,7 @@ class AerolineasHomePage:
     @allure.step("Verificar accesibilidad de links importantes")
     def verificar_links(self):
 
+
         links = [
             ("Vuelos", "//a[contains(text(),'VUELOS')]"),
             ("Check-in", "//a[contains(text(),'CHECK IN')]"),
@@ -95,6 +106,7 @@ class AerolineasHomePage:
             allure.dynamic.description(f"Verificando link: {name}")
             assert self.verify_element(By.XPATH, xpath), f"El enlace '{
                 name}' no fue encontrado."
+                
 
     @allure.step("Verificar links")
     def verify_element(self, by, locator):
@@ -105,6 +117,7 @@ class AerolineasHomePage:
             return True
         except:
             return False
+
 
     @allure.step("Verificar boton menu idiomas e idioma seleccionado ")
     def bnt_lenguaje_menu(self):
@@ -124,6 +137,8 @@ class AerolineasHomePage:
             print("Idioma seleccionado")
         else:
             print("El botón de idioma no está visible")
+        # datos excel
+
         # datos excel
 
     @allure.step("Validar los datos ingresados desde un archivo plano: en este caso Excel")
@@ -222,7 +237,8 @@ class AerolineasHomePage:
                 precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
                 if precio_vuelo_regreso > 0:
                     print("Día:", dia_vuelo_regreso,
-                          "Precio:", precio_vuelo_regreso)
+                        "Precio:", precio_vuelo_regreso)
+
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
 
@@ -248,6 +264,7 @@ class AerolineasHomePage:
             if btn_comprar.is_enabled():
                 btn_comprar.click()
                 time.sleep(6)
+
 
                 print("El botón de comprar de vuelo es visible y hacemos click en él")
             else:
@@ -321,6 +338,26 @@ class AerolineasHomePage:
 
             print(
                 "No se encontró el botón de ver vuelos ")
+
+    # test +20 dias en hoja2
+    @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias a hoja 2")
+    def datos_excel_sumar_20(self):
+        archivo = openpyxl.load_workbook(
+            'C:\\py_automation\\py_testaerolineas\\Data\\datos_qa.xlsx')
+        sheet = archivo['Hoja2']
+        for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
+            valores_fila = [celda.value for celda in fila]
+            origen, destino, ida, regreso, url = valores_fila
+            # Sumar 20 días a la fecha de ida y regreso
+            ida = self.sumar_20_dias(ida)
+            regreso = self.sumar_20_dias(regreso)
+            ida_str = ida.strftime("%d/%m/%Y")
+            regreso_str = regreso.strftime("%d/%m/%Y")
+            self.buscar_vuelo(origen, destino, ida_str, regreso_str)
+
+    def sumar_20_dias(self, fecha_actual):
+        fecha_sumada = fecha_actual + timedelta(days=20)
+        return fecha_sumada
 
     # test +20 dias en hoja2
     @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias a hoja 2")
