@@ -12,12 +12,15 @@ import openpyxl
 import csv
 
 
+
 class AerolineasHomePage:
     # Locators
     btn_locator_aceptar_cookies = (
         By.XPATH, "(//button[@type='cookies'])")
     btn_locator_lenguaje_menu = (
         By.XPATH, "//button[@class='styled__LanguageMenu-sc-22nvvu-8 fEfYIU']")
+    lenguaje_elegido =(
+        By.XPATH, "//div[@id='language-panel']//a[normalize-space()='United States (English)']")
     box_origen = (By.XPATH, "//input[@placeholder='Origen']")
     box_destino = (By.XPATH, "//input[@placeholder='Destino']")
     box_date_from = (By.XPATH, "//input[@id='from-date']")
@@ -27,13 +30,14 @@ class AerolineasHomePage:
         By.CSS_SELECTOR, "button.styled__IconContainer-sc-1sy3ra0-1.eoncfD.add-adt")
     btn_click_vuelo = (By. XPATH, "//button[@id= 'search-flights']")
     # Localizadores para los elementos
-    fecha_ida = (By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+    fecha_ida = (
+        By.XPATH, "//div[contains(@class, 'styled__EnabledDateOffer-ty299w-8')]//div[contains(@class, 'fdc-button-day') and normalize-space()='1']")
     fecha_vuelta = (
-        By.XPATH, "//div[contains(@class, 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day')]//div[contains(@class, 'styled__ButtonDay-ty299w-3 cwDvyN fdc-button-day')]")
+        By.XPATH, "//div[contains(@class, 'styled__EnabledDateOffer-ty299w-8')]//div[contains(@class, 'fdc-button-day') and normalize-space()='7']")
     label_locator_monto = (
-        By.XPATH, "//div[@class='styled__Price-ty299w-0 cbwzbP fdc-button-price']")
+        By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
+    btn_ver_vuelo = (By.XPATH, "//button[contains(text(),'Ver vuelos')]")
 
-    btn_ver_vuelo = (By.XPATH, "//button[normalize-space()='Ver vuelos']")
 
     card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
     card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
@@ -43,7 +47,8 @@ class AerolineasHomePage:
         By.XPATH, "(//button[normalize-space()='Destinos Internacionales'])")
     btn_regionales_card = (
         By.XPATH, "(//button[normalize-space()='Destinos Regionales'])")
-
+    
+    
     def __init__(self, driver):
         self.driver = driver
     # metodos
@@ -67,22 +72,24 @@ class AerolineasHomePage:
         for num in links:
             print(num.text)
         assert len(links) > 0, "No hay links en el home"
-
-    @allure.step("Verificar boton menu idiomas ")
+    @allure.step("Verificar boton menu idiomas e idiome seleccionado ")
     def bnt_lenguaje_menu(self):
         btn_lenguaje = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.btn_locator_lenguaje_menu)
         )
-        if btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).is_displayed():
-            btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).click()
+        if btn_lenguaje.is_displayed():
+            btn_lenguaje.click()
             time.sleep(3)
-            print(
-                "El menu lenguaje es visible")
+            print("El menu lenguaje es visible")
             assert btn_lenguaje.is_displayed(), "El boton no esta verificado"
+            lenguage_option = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.lenguaje_elegido)
+            )
+            lenguage_option.click()
+            time.sleep(5)
+            print("Idioma seleccionado")
         else:
             print("El botón de idioma no está visible")
-        btn_lenguaje.find_element(*self.btn_locator_lenguaje_menu).click()
-
     @allure.step("Validar los datos ingresados desde un archivo plano: en este caso Excel")
     def datos_excel(self):
         archivo = openpyxl.load_workbook(
@@ -95,6 +102,7 @@ class AerolineasHomePage:
             regreso_str = regreso.strftime("%d/%m/%Y")
             self.buscar_vuelo(origen, destino, ida_str, regreso_str)
 
+    @allure.step("Validar los datos de la reserva")
     def buscar_vuelo(self, origen, destino, ida_str, regreso_str):
         box_origen = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_origen))
@@ -103,7 +111,6 @@ class AerolineasHomePage:
         time.sleep(2)
         box_origen.send_keys(Keys.ARROW_DOWN, Keys.ENTER, Keys.TAB)
         print("Caja de origen es visible y los datos son ingresados")
-
         box_destino = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_destino))
         box_destino.clear()
@@ -111,13 +118,11 @@ class AerolineasHomePage:
         time.sleep(2)
         box_destino.send_keys(Keys.ARROW_DOWN, Keys.ENTER, Keys.TAB)
         print("Caja de destino es visible y los datos son ingresados")
-
         box_date_from = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_date_from))
         box_date_from.clear()
         box_date_from.send_keys(ida_str, Keys.TAB)
         print("Caja de date_from es visible y los datos son ingresados")
-
         box_date_return = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.box_date_return))
         box_date_return.clear()
@@ -130,8 +135,8 @@ class AerolineasHomePage:
             pasajeros = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.number_pasajeros))
             pasajeros.click()
+            assert pasajeros.is_displayed(), "El boton no esta verificado"
             print("Boton pasajeros visible y hacemos click")
-
             btn_mas = WebDriverWait(self.driver, 20).until(
                 EC.visibility_of_element_located(self.sumar_pasajeros))
             btn_mas.click()
@@ -148,10 +153,10 @@ class AerolineasHomePage:
         try:
             btn_comprar = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_element_located(self.btn_click_vuelo))
-
             if btn_comprar.is_enabled():
                 btn_comprar.click()
                 time.sleep(6)
+                
                 print("El botón de comprar de vuelo es visible y hacemos click en él")
             else:
                 print("El botón de compra de vuelo no es visible.")
@@ -161,10 +166,10 @@ class AerolineasHomePage:
     @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
     def precios_vuelos(self):
         try:
-            vuelos_ida = WebDriverWait(self.driver, 20).until(
+            vuelos_ida = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_all_elements_located(self.fecha_ida))
             time.sleep(3)
-            vuelos_vuelta = WebDriverWait(self.driver, 20).until(
+            vuelos_vuelta = WebDriverWait(self.driver, 10).until(
                 EC.visibility_of_all_elements_located(self.fecha_vuelta))
             time.sleep(3)
 
@@ -185,6 +190,7 @@ class AerolineasHomePage:
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
 
+    @allure.step("Validar precios")
     def obtener_precio_vuelo(self, vuelo_elemento):
         try:
             precio_elemento = vuelo_elemento.find_element(
@@ -204,10 +210,10 @@ class AerolineasHomePage:
                 EC.visibility_of_element_located(self.btn_ver_vuelo)
             )
 
-            if ver_vuelo.is_displayed():
+            if ver_vuelo.is_enabled():
                 ver_vuelo.click()
 
-                time.sleep(6)
+                time.sleep(3)
                 print(
                     "El botón de ver vuelos es visible y hacemos click en el")
             else:
@@ -217,6 +223,7 @@ class AerolineasHomePage:
             print(
                 "No se encontró el botón de ver vuelos ")
 
+    
     # Test card Nacional
     @allure.step("Validar si se encuentran las Cards de Destinos Nacionales")
     def validate_destino_nacional_card(self):

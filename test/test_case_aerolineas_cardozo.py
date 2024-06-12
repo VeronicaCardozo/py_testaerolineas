@@ -14,7 +14,6 @@ class Test:
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
         home_page.cantidad_links_home()
-
     @allure.title("Validar y verificar boton aceptar menu lenguaje funcione")
     @allure.description("Validar boton menu lenguaje")
     @pytest.mark.noprod
@@ -22,6 +21,7 @@ class Test:
         with allure.step("Ingreso a la pagina y validar el menu lenguaje "):
             driver.get("https://www.aerolineas.com.ar/")
         home_page = AerolineasHomePage(driver)
+        home_page.click_aceptar_cookies()
         home_page.bnt_lenguaje_menu()
 
     @ allure.title("Validar y verificar la compra de un vuelo ingresando datos")
@@ -37,7 +37,7 @@ class Test:
         home_page.comprar_vuelo()
         home_page.precios_vuelos()
         home_page.ver_vuelos()
-    # me falta hacer lo de el excel y lo del page-result
+    
 
 
 if __name__ == "__main__":
