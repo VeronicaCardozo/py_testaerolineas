@@ -42,8 +42,6 @@ class AerolineasHomePage:
     label_locator_monto = (
         By.XPATH, "//div[@class = 'styled__DateOfferItem-ty299w-6 styled__EnabledDateOffer-ty299w-8 guJlAe fdc-available-day']//div[@class = 'styled__Price-ty299w-0 cbwzbP fdc-button-price'][normalize-space()]")
     btn_ver_vuelo = (By.XPATH, "//button[contains(text(),'Ver vuelos')]")
-
-
     card_destino_nacional_0 = (By.XPATH, "(//a[@data-posicion='0'])")
     card_destino_nacional_1 = (By.XPATH, "//a[@data-posicion='1']")
     card_destino_nacional_2 = (By.XPATH, "//a[@data-posicion='2']")
@@ -95,10 +93,11 @@ class AerolineasHomePage:
             print("Idioma seleccionado")
         else:
             print("El botón de idioma no está visible")
+        #datos excel 
     @allure.step("Validar los datos ingresados desde un archivo plano: en este caso Excel")
     def datos_excel(self):
         archivo = openpyxl.load_workbook(
-            'C:\\Users\\cvmor\\OneDrive\\Escritorio\\TestingMerlinData\\py_testaerolineas\\Data\\datos_qa.xlsx')
+            'C:\\py_automation\\Data\\datos_qa.xlsx')
         sheet = archivo['Hoja1']
         for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
             valores_fila = [celda.value for celda in fila]
@@ -106,25 +105,6 @@ class AerolineasHomePage:
             ida_str = ida.strftime("%d/%m/%Y")
             regreso_str = regreso.strftime("%d/%m/%Y")
             self.buscar_vuelo(origen, destino, ida_str, regreso_str)
-
-    @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias")
-    def datos_excel_sumar_20(self):
-        archivo = openpyxl.load_workbook(
-            'C:\\Users\\cvmor\\OneDrive\\Escritorio\\TestingMerlinData\\py_testaerolineas\\Data\\datos_qa.xlsx')
-        sheet = archivo['Hoja2']
-        for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
-            valores_fila = [celda.value for celda in fila]
-            origen, destino, ida, regreso, url = valores_fila
-            # Sumar 20 días a la fecha de ida y regreso
-            ida = self.sumar_20_dias(ida)
-            regreso = self.sumar_20_dias(regreso)
-            ida_str = ida.strftime("%d/%m/%Y")
-            regreso_str = regreso.strftime("%d/%m/%Y")
-            self.buscar_vuelo(origen, destino, ida_str, regreso_str)
-
-    def sumar_20_dias(self, fecha_actual):
-        fecha_sumada = fecha_actual + timedelta(days=20)
-        return fecha_sumada
 
     @allure.step("Validar los datos de la reserva")
     def buscar_vuelo(self, origen, destino, ida_str, regreso_str):
@@ -171,6 +151,62 @@ class AerolineasHomePage:
             return True
         except TimeoutException as e:
             print(f"Error: {e}")
+
+    @allure.step("Validar la búsqueda ingresando al botón búsqueda de vuelo de un vuelo-ida-regreso")
+    def comprar_vuelo(self):
+        try:
+            btn_comprar = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located(self.btn_click_vuelo))
+            if btn_comprar.is_enabled():
+                btn_comprar.click()
+                time.sleep(6)
+
+                print("El botón de comprar de vuelo es visible y hacemos click en él")
+            else:
+                print("El botón de compra de vuelo no es visible.")
+        except TimeoutException:
+            print("No se encontró el botón de comprar de vuelo ")
+
+    @allure.step("Validar los elementos de vuelo y precios en la grilla de vuelos")
+    def precios_vuelos(self):
+        try:
+            vuelos_ida = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located(self.fecha_ida))
+            time.sleep(3)
+            vuelos_vuelta = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_all_elements_located(self.fecha_vuelta))
+            time.sleep(3)
+
+            print("Vuelos de ida:")
+            for vuelo in vuelos_ida:
+                dia_vuelo_ida = vuelo.text
+                precio_vuelo_ida = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_ida > 0:
+                    print("Día:", dia_vuelo_ida, "Precio:", precio_vuelo_ida)
+
+            print("Vuelos de regreso:")
+            for vuelo in vuelos_vuelta:
+                dia_vuelo_regreso = vuelo.text
+                precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
+                if precio_vuelo_regreso > 0:
+                    print("Día:", dia_vuelo_regreso,
+                        "Precio:", precio_vuelo_regreso)
+        except TimeoutException:
+            print("Error: No se encontraron vuelos en la fecha seleccionada")
+
+    @allure.step("Validar precios")
+    def obtener_precio_vuelo(self, vuelo_elemento):
+        try:
+            precio_elemento = vuelo_elemento.find_element(
+                *self.label_locator_monto)
+            precio_text = precio_elemento.text.replace(
+                '$', '').replace(',', '').strip()
+            if precio_text and precio_text.replace('.', '', 1).isdigit():
+                return float(precio_text)
+            return 0.0
+        except Exception as e:
+            print(f"Error al obtener el precio del vuelo: {e}")
+            return 0.0
 
     @allure.step("Validar la búsqueda ingresando al botón búsqueda de vuelo de un vuelo-ida-regreso")
     def comprar_vuelo(self):
