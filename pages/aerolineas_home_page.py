@@ -237,7 +237,7 @@ class AerolineasHomePage:
                 precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
                 if precio_vuelo_regreso > 0:
                     print("Día:", dia_vuelo_regreso,
-                          "Precio:", precio_vuelo_regreso)
+                        "Precio:", precio_vuelo_regreso)
 
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
@@ -342,7 +342,7 @@ class AerolineasHomePage:
     @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias a hoja 2")
     def datos_excel_sumar_20(self):
         archivo = openpyxl.load_workbook(
-            'C:\\py_automation\\py_testaerolineas\\Data\\datos_qa.xlsx')
+            'C:\\py_automation\\Data\\datos_qa.xlsx')
         sheet = archivo['Hoja2']
         for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
             valores_fila = [celda.value for celda in fila]
@@ -362,7 +362,7 @@ class AerolineasHomePage:
     @allure.step("Validar los datos ingresados desde un archivo plano sumando 20 dias a hoja 2")
     def datos_excel_sumar_20(self):
         archivo = openpyxl.load_workbook(
-            'C:\\py_automation\\py_testaerolineas\\Data\\datos_qa.xlsx')
+            'C:\\py_automation\\Data\\datos_qa.xlsx')
         sheet = archivo['Hoja2']
         for fila in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
             valores_fila = [celda.value for celda in fila]

@@ -49,7 +49,7 @@ class home_page_vero:
 
     @allure.step("Verificamos el boton aceptar cookies y la cantidad de links en el home")
     def click_aceptar_cookies(self):
-        btn = WebDriverWait(self.driver, 3).until(
+        btn = WebDriverWait(self.driver, 3).until(#esperas explicitas
             EC.visibility_of_element_located(
                 self.btn_locator_aceptar_cookies)
         )
