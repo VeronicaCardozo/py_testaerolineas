@@ -19,10 +19,10 @@ class AerolineasHomePage:
 
     # Locators
     btn_locator_aceptar_cookies = (
-        By.XPATH, "(//button[@type='cookies'])")
+        By.XPATH, "//span[normalize-space()='Aceptar']")
     btn_locator_lenguaje_menu = (
         By.XPATH, "//button[@class='styled__LanguageMenu-sc-22nvvu-8 fEfYIU']")
-    
+
     lenguaje_elegido = (
         By.XPATH, "//div[@id='language-panel']//a[normalize-space()='United States (English)']")
     box_origen = (By.XPATH, "//input[@placeholder='Origen']")
@@ -95,7 +95,6 @@ class AerolineasHomePage:
     @allure.step("Verificar accesibilidad de links importantes")
     def verificar_links(self):
 
-
         links = [
             ("Vuelos", "//a[contains(text(),'VUELOS')]"),
             ("Check-in", "//a[contains(text(),'CHECK IN')]"),
@@ -106,7 +105,6 @@ class AerolineasHomePage:
             allure.dynamic.description(f"Verificando link: {name}")
             assert self.verify_element(By.XPATH, xpath), f"El enlace '{
                 name}' no fue encontrado."
-                
 
     @allure.step("Verificar links")
     def verify_element(self, by, locator):
@@ -117,7 +115,6 @@ class AerolineasHomePage:
             return True
         except:
             return False
-
 
     @allure.step("Verificar boton menu idiomas e idioma seleccionado ")
     def bnt_lenguaje_menu(self):
@@ -237,7 +234,7 @@ class AerolineasHomePage:
                 precio_vuelo_regreso = self.obtener_precio_vuelo(vuelo)
                 if precio_vuelo_regreso > 0:
                     print("Día:", dia_vuelo_regreso,
-                        "Precio:", precio_vuelo_regreso)
+                          "Precio:", precio_vuelo_regreso)
 
         except TimeoutException:
             print("Error: No se encontraron vuelos en la fecha seleccionada")
@@ -264,7 +261,6 @@ class AerolineasHomePage:
             if btn_comprar.is_enabled():
                 btn_comprar.click()
                 time.sleep(6)
-
 
                 print("El botón de comprar de vuelo es visible y hacemos click en él")
             else:
@@ -476,6 +472,7 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+        return output_file
 
     def validate_card_internacional_csv(self, output_file='ofertas_internacionales.csv'):
         xpaths = [
@@ -508,6 +505,7 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+        return output_file
 
     def validate_card_regional_csv(self, output_file='ofertas_regionales.csv'):
         xpaths = [
@@ -540,9 +538,18 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+        return output_file
 
-
-
+    @allure.step("Verificamos el boton aceptar cookies y la cantidad de links en el home")
+    def click_aceptar_cookie(self):
+        btn = WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located(
+                self.btn_locator_aceptar_cookies)
+        )
+        print(" Boton aceptar cookies visible")
+        assert btn.is_displayed(), "El boton de cookies no esta visible"
+        btn.click()
+        print(" Boton aceptar cookies visible y se hizo click en el ")
 
     @allure.step("Verificación whatsapp web")
     def whatsapp_chat(self):
