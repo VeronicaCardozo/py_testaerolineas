@@ -16,6 +16,16 @@ class Test:
         home_page = AerolineasHomePage(driver)
         home_page.click_aceptar_cookies()
         home_page.cantidad_links_home()
+
+    @allure.title("Validar y verificar links con funcionalidades importates")
+    @allure.description("Validar que los links funcionen")
+    @pytest.mark.noprod
+    def test_links(self, driver):
+        with allure.step("Ingreso a la pagina y valida los tests solicitados"):
+            driver.get("https://www.aerolineas.com.ar/")
+        home_page = AerolineasHomePage(driver)
+        home_page.click_aceptar_cookies()
+        home_page.verificar_links()
     @allure.title("Validar y verificar boton aceptar menu lenguaje funcione")
     @allure.description("Validar boton menu lenguaje")
     @pytest.mark.noprod

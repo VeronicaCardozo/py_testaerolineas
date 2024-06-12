@@ -75,7 +75,31 @@ class AerolineasHomePage:
         for num in links:
             print(num.text)
         assert len(links) > 0, "No hay links en el home"
-    @allure.step("Verificar boton menu idiomas e idiome seleccionado ")
+
+    @allure.step("Verificar accesibilidad de links importantes")
+    def verificar_links(self):
+        
+        links = [
+            ("Vuelos", "//a[contains(text(),'VUELOS')]"),
+            ("Check-in", "//a[contains(text(),'CHECK IN')]"),
+            ("Estado de vuelo", "//a[contains(text(),'ESTADO DE VUELO')]"),
+            ("Mi reserva", "//a[contains(text(),'MI RESERVA')]")
+        ]
+        for name, xpath in links:
+            allure.dynamic.description(f"Verificando link: {name}")
+            assert self.verify_element(By.XPATH, xpath), f"El enlace '{
+            name}' no fue encontrado."
+
+    @allure.step("Verificar links")
+    def verify_element(self, by, locator):
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((by, locator))
+            )
+            return True
+        except:
+            return False
+    @allure.step("Verificar boton menu idiomas e idioma seleccionado ")
     def bnt_lenguaje_menu(self):
         btn_lenguaje = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.btn_locator_lenguaje_menu)
