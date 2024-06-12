@@ -43,6 +43,14 @@ class AerolineasHomePage:
         By.XPATH, "(//button[normalize-space()='Destinos Internacionales'])")
     btn_regionales_card = (
         By.XPATH, "(//button[normalize-space()='Destinos Regionales'])")
+    button_whatsapp_locator = (By.ID, "whatsapp_flotante")
+    button_chatbot_locator = (By.XPATH, "//body/div[@id='wcx-chat']/button[1]")
+    box_chatbot_locator = (
+        By.XPATH, "//div[@class='chat-container']//span[@class='input-group-addon']//input[@class='form-control ng-pristine ng-invalid ng-invalid-required ng-touched div-name-with-buttons']")
+    iframe_chat_onlyne_locator = (
+        By.XPATH, "//body/div[@id='wcx-chat']/div[1]/div[1]/iframe[1]")
+    chat_olyne_name_input_locator = (
+        By.XPATH, "//div[@id='f1e92af809cc4af596b8e15009725100']//input[@name='name']")
 
     def __init__(self, driver):
         self.driver = driver
@@ -378,3 +386,225 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+
+    @allure.step("Verificación whatsapp web")
+    def whatsapp_chat(self):
+        btn_wts = WebDriverWait(self.driver, 20).until(
+            EC.visibility_of_element_located(self.button_whatsapp_locator)
+        )
+        assert btn_wts.is_displayed(), "El botón de WhatsApp no es visible"
+        btn_wts.click()
+        print("Se hizo clic en el botón de WhatsApp")
+
+        # Esperar a que aparezca la ventana emergente de WhatsApp
+        WebDriverWait(self.driver, 20).until(
+            lambda driver: len(driver.window_handles) > 1
+        )
+
+        # Cambiar al nuevo handle (ventana emergente)
+        new_handle = self.driver.window_handles[-1]
+        self.driver.switch_to.window(new_handle)
+
+        # Verificar el enlace de la ventana emergente de WhatsApp
+        current_url = self.driver.current_url
+        assert "https://api.whatsapp.com/send?phone=541149404798" in current_url, f"La URL actual no es de WhatsApp: {
+            current_url}"
+
+        print("Verificación de WhatsApp completada correctamente")
+
+# En tu página de inicio de Aerolíneas, verifica el botón de chat online después de hacer clic en WhatsApp
+
+    @allure.step("Verificación chat-online login")
+    def login_chat_online(self):
+        # Esperar a que el botón del chatbot sea visible
+        btn_chat_online = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.button_chatbot_locator)
+        )
+        assert btn_chat_online.is_displayed(), "El botón de chat no es visible"
+        btn_chat_online.click()
+        print("Se hizo click en el botón")
+
+        # Cambiar al iframe del chat en línea
+        WebDriverWait(self.driver, 10).until(
+            EC.frame_to_be_available_and_switch_to_it(
+                self.iframe_chat_onlyne_locator)
+        )
+        print("Se cambió al iframe del chat en línea")
+
+        # Ingresar un nombre en el campo de entrada name
+        input_locator_name = (By.NAME, "name")
+        input_element_name = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_name)
+        )
+        input_element_name.send_keys("Nombre de prueba")
+
+        # Ingresar un correo en el campo de entrada email
+        input_locator_email = (By.NAME, "email")
+        input_element_email = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_email)
+        )
+        input_element_email.send_keys("python@automation.com")
+
+        # Ingresar información en el campo de entrada pasajero_frecuente
+        input_locator_pasajero_frecuente = (By.NAME, "pasajero_frecuente")
+        input_element_pasajero_frecuente = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_pasajero_frecuente)
+        )
+        input_element_pasajero_frecuente.send_keys("no tengo")
+
+        # Hacer click en el botón "Continuar"
+        continuar_button_locator = (
+            By.XPATH, "//input[@type='submit' and @value='Continuar']")
+        button_element_continuar = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(continuar_button_locator)
+        )
+        button_element_continuar.click()
+
+        # Verificar que se haya cambiado al nuevo contexto después de hacer click en Continuar
+        WebDriverWait(self.driver, 10).until(
+            EC.staleness_of(button_element_continuar))
+        print("Se cambió de contexto después de hacer click en Continuar")
+
+        # Volver al contexto padre si es necesario
+        self.driver.switch_to.default_content()
+        print("Verificación de chat online completada correctamente")
+
+    @allure.step("Verificación chat-online boton mis reservas")
+    def reservas_chat_online(self):
+        self.login_chat_online()
+        # Localizar y hacer click en el botón "Ver mi reserva"
+        button_reserva_locator = (
+            By.XPATH, "//button[contains(text(), 'Ver mi reserva')]")
+        button_element_reserva = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(button_reserva_locator)
+        )
+        assert button_element_reserva.is_displayed(
+        ), "El botón 'Ver mi reserva' no es visible"
+        button_element_reserva.click()
+        print("Se hizo click en el botón 'Ver mi reserva'")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Botón Ver mi reserva clickeado", attachment_type=allure.attachment_type.PNG)
+
+        # Ingresar un número de reserva incorrecto
+        input_locator_reserva = (By.NAME, "chat")
+        input_element_reserva = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_reserva)
+        )
+        # Número de reserva incorrecto
+        input_element_reserva.send_keys("1234567")
+        print("se ingresa numero incorrecto de reserva")
+
+        # Enviar el número de reserva incorrecto
+        enviar_button_locator = (
+            By.ID, "send")
+        button_element_enviar = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(enviar_button_locator)
+        )
+        button_element_enviar.click()
+
+        print("Se verifico que el chat responde'")
+        # Volver al contexto padre si es necesario
+        self.driver.switch_to.default_content()
+
+        print("Verificación del boton reservas en chat online completada correctamente")
+
+    @allure.step("Verificación chat-online No valide mis reservas")
+    def reservas_chat_online2(self):
+        # Esperar a que el botón del chatbot sea visible
+        btn_chat_online = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.button_chatbot_locator)
+        )
+        assert btn_chat_online.is_displayed(), "El botón de chat no es visible"
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Botón chatbot visible", attachment_type=allure.attachment_type.PNG)
+        btn_chat_online.click()
+        print("Se hizo click en el botón")
+
+        # Cambiar al iframe del chat en línea
+        iframe_chat_online = WebDriverWait(self.driver, 10).until(
+            EC.frame_to_be_available_and_switch_to_it(
+                self.iframe_chat_onlyne_locator)
+        )
+        print("Se cambió al iframe del chat en línea")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Cambio a iframe del chat", attachment_type=allure.attachment_type.PNG)
+
+        # Ingresar un nombre en el campo de entrada name
+        input_locator_name = (By.NAME, "name")
+        input_element_name = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_name)
+        )
+        input_element_name.send_keys("Nombre de prueba")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Nombre ingresado", attachment_type=allure.attachment_type.PNG)
+
+        # Ingresar un correo en el campo de entrada email
+        input_locator_email = (By.NAME, "email")
+        input_element_email = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_email)
+        )
+        input_element_email.send_keys("python@automation.com")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Email ingresado", attachment_type=allure.attachment_type.PNG)
+
+        # Ingresar información en el campo de entrada pasajero_frecuente
+        input_locator_pasajero_frecuente = (By.NAME, "pasajero_frecuente")
+        input_element_pasajero_frecuente = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_pasajero_frecuente)
+        )
+        input_element_pasajero_frecuente.send_keys("no tengo")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Información ingresada", attachment_type=allure.attachment_type.PNG)
+
+        # Hacer click en el botón "Continuar"
+        continuar_button_locator = (
+            By.XPATH, "//input[@type='submit' and @value='Continuar']")
+        button_element_continuar = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(continuar_button_locator)
+        )
+        button_element_continuar.click()
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Botón Continuar clickeado", attachment_type=allure.attachment_type.PNG)
+
+        # Verificar que se haya cambiado al nuevo contexto después de hacer click en Continuar
+        WebDriverWait(self.driver, 10).until(
+            EC.staleness_of(button_element_continuar))
+        print("Se cambió de contexto después de hacer click en Continuar")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Cambio de contexto verificado", attachment_type=allure.attachment_type.PNG)
+
+        # Localizar y hacer click en el botón "Ver mi reserva"
+        button_reserva_locator = (
+            By.XPATH, "//button[contains(text(), 'Ver mi reserva')]")
+        button_element_reserva = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(button_reserva_locator)
+        )
+        assert button_element_reserva.is_displayed(
+        ), "El botón 'Ver mi reserva' no es visible"
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Botón Ver mi reserva visible", attachment_type=allure.attachment_type.PNG)
+        button_element_reserva.click()
+        print("Se hizo click en el botón 'Ver mi reserva'")
+        allure.attach(self.driver.get_screenshot_as_png(
+        ), name="Botón Ver mi reserva clickeado", attachment_type=allure.attachment_type.PNG)
+
+        # Ingresar un número de reserva incorrecto
+        input_locator_reserva = (By.NAME, "chat")
+        input_element_reserva = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(input_locator_reserva)
+        )
+        # Número de reserva incorrecto
+        input_element_reserva.send_keys("1234567")
+        print("se ingresa numero incorrecto de reserva")
+
+        # Enviar el número de reserva incorrecto
+        enviar_button_locator = (
+            By.ID, "send")
+        button_element_enviar = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(enviar_button_locator)
+        )
+        button_element_enviar.click()
+
+        print("Se verifico que el chat responde'")
+        # Volver al contexto padre si es necesario
+        self.driver.switch_to.default_content()
