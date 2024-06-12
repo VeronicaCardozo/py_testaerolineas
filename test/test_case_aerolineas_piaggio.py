@@ -21,7 +21,7 @@ class Test_cards:
 
         with allure.step("Adjuntar el archivo CSV al reporte"):
             allure.attach.file(csv_file, name='ofertas_nacionales',
-                               attachment_type=allure.attachment_type.CSV)
+                            attachment_type=allure.attachment_type.CSV)
 
     @allure.epic("Home_page_cards")
     @allure.title("Validar y verificar que las ofertas Internacionales sean visibles")
@@ -38,7 +38,7 @@ class Test_cards:
 
         with allure.step("Adjuntar el archivo CSV al reporte"):
             allure.attach.file(csv_file, name='ofertas_internacionales',
-                               attachment_type=allure.attachment_type.CSV)
+                            attachment_type=allure.attachment_type.CSV)
 
     @allure.epic("Home_page_cards")
     @allure.title("Validar y verificar que las ofertas Regionales sean visibles")
@@ -57,7 +57,7 @@ class Test_cards:
 
         with allure.step("Adjuntar el archivo CSV al reporte"):
             allure.attach.file(csv_file, name='ofertas_regionales',
-                               attachment_type=allure.attachment_type.CSV)
+                            attachment_type=allure.attachment_type.CSV)
 
 
 if __name__ == "__main__":
