@@ -495,3 +495,39 @@ class AerolineasHomePage:
                 writer.writerows(data)
 
             print(f'Data has been written to {output_file}')
+    btn_locator_aceptar_cookies = (By.XPATH, "//button[@id='cookies']")
+    btn_locator_vuelos = (By.XPATH, "//a[normalize-space()='VUELOS']")
+    btn_locator_check_in = (By.XPATH, "//a[normalize-space()='CHECK IN']")
+
+    @allure.step("Hacemos click en el boton aceptar cookies")
+    def clic_aceptar_cookies(self):
+        """
+        Método para validar el botón aceptar cookies.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_aceptar_cookies)
+        )
+        if self.driver.find_element(*self.btn_locator_aceptar_cookies).is_displayed():
+            self.driver.find_element(*self.btn_locator_aceptar_cookies).click()
+
+    @allure.step("Verificar el boton vuelos")
+    def btn_vuelos(self):
+        """
+        Método para validar el boton vuelo.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_vuelos)
+        )
+        if self.driver.find_element(*self.btn_locator_vuelos).is_displayed():
+            self.driver.find_element(*self.btn_locator_vuelos).click()
+
+    @allure.step("Verificar el boton chek in")
+    def btn_check_in(self):
+        """
+        Método para validar el boton check in.
+        """
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located(self.btn_locator_check_in)
+        )
+        if self.driver.find_element(*self.btn_locator_check_in).is_displayed():
+            self.driver.find_element(*self.btn_locator_check_in).click()
